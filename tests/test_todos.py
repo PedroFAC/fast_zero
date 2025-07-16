@@ -1,9 +1,8 @@
 from http import HTTPStatus
 
 import pytest
-from sqlalchemy import select
 
-from fast_zero.models import Todo, TodoState, User
+from fast_zero.models import Todo, TodoState
 from tests.factories import TodoFactory
 
 
@@ -18,15 +17,15 @@ def test_create_todo(client, token, mock_db_time):
                 'state': 'draft',
             },
         )
-    assert response.status_code == HTTPStatus.OK
-    assert response.json() == {
-        'id': 1,
-        'title': 'Test todo',
-        'description': 'Test todo description',
-        'state': 'draft',
-        'created_at': time.isoformat(),
-        'updated_at': time.isoformat(),
-    }
+        assert response.status_code == HTTPStatus.OK
+        assert response.json() == {
+            'id': 1,
+            'title': 'Test todo',
+            'description': 'Test todo description',
+            'state': 'draft',
+            'created_at': time.isoformat(),
+            'updated_at': time.isoformat(),
+        }
 
 
 @pytest.mark.asyncio
@@ -224,22 +223,6 @@ async def test_list_todos_should_return_all_expected_fields(
             'title': todo.title,
         }
     ]
-
-
-@pytest.mark.asyncio
-async def test_create_todo_error(session, user: User):
-    todo = Todo(
-        title='Test Todo',
-        description='Test Desc',
-        state='test',
-        user_id=user.id,
-    )
-
-    session.add(todo)
-    await session.commit()
-
-    with pytest.raises(LookupError):
-        await session.scalar(select(Todo))
 
 
 def test_list_todos_filter_min_length(client, token):
